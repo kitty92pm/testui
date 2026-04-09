@@ -1010,23 +1010,28 @@ function utility.roundedSquare(parent, radius, props)
     end
 
     local function update()
-        local pos = main.Position
-        local size = main.Size
+    local pos = main.Position
+    local size = main.Size
 
-        if typeof(pos) ~= "Vector2" or typeof(size) ~= "Vector2" then
-            return -- prevents crash
-        end
-
-        corners[1].Position = pos + Vector2.new(radius, radius)
-        corners[2].Position = pos + Vector2.new(size.X - radius, radius)
-        corners[3].Position = pos + Vector2.new(radius, size.Y - radius)
-        corners[4].Position = pos + Vector2.new(size.X - radius, size.Y - radius)
-
-        for _, c in pairs(corners) do
-            c.Color = main.Color
-            c.Visible = main.Visible
-        end
+    -- convert if UDim2
+    if typeof(pos) == "UDim2" then
+        pos = Vector2.new(pos.X.Offset, pos.Y.Offset)
     end
+
+    if typeof(size) == "UDim2" then
+        size = Vector2.new(size.X.Offset, size.Y.Offset)
+    end
+
+    -- safety check
+    if typeof(pos) ~= "Vector2" or typeof(size) ~= "Vector2" then
+        return
+    end
+
+    corners[1].Position = pos + Vector2.new(radius, radius)
+    corners[2].Position = pos + Vector2.new(size.X - radius, radius)
+    corners[3].Position = pos + Vector2.new(radius, size.Y - radius)
+    corners[4].Position = pos + Vector2.new(size.X - radius, size.Y - radius)
+end
 
     -- update every frame (needed for your UI system)
     game:GetService("RunService").RenderStepped:Connect(update)
