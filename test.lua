@@ -996,9 +996,9 @@ end
 function utility.roundedSquare(parent, radius, props)
     local main = utility.create("Square", props)
 
-    -- corners
     local corners = {}
-    for i = 1,4 do
+
+    for i = 1, 4 do
         local c = drawing:new("Circle")
         c.Filled = true
         c.Radius = radius
@@ -1013,17 +1013,23 @@ function utility.roundedSquare(parent, radius, props)
         local pos = main.Position
         local size = main.Size
 
-        -- top left
+        if typeof(pos) ~= "Vector2" or typeof(size) ~= "Vector2" then
+            return -- prevents crash
+        end
+
         corners[1].Position = pos + Vector2.new(radius, radius)
-        -- top right
         corners[2].Position = pos + Vector2.new(size.X - radius, radius)
-        -- bottom left
         corners[3].Position = pos + Vector2.new(radius, size.Y - radius)
-        -- bottom right
         corners[4].Position = pos + Vector2.new(size.X - radius, size.Y - radius)
+
+        for _, c in pairs(corners) do
+            c.Color = main.Color
+            c.Visible = main.Visible
+        end
     end
 
-    update()
+    -- update every frame (needed for your UI system)
+    game:GetService("RunService").RenderStepped:Connect(update)
 
     return main
 end
