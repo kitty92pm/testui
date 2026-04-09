@@ -991,7 +991,42 @@ function utility.dragify(object, dragoutline)
 			object.Position = currentpos
 		end
 	end)
-end 
+end
+
+function utility.roundedSquare(parent, radius, props)
+    local main = utility.create("Square", props)
+
+    -- corners
+    local corners = {}
+    for i = 1,4 do
+        local c = drawing:new("Circle")
+        c.Filled = true
+        c.Radius = radius
+        c.Color = main.Color
+        c.ZIndex = main.ZIndex
+        c.Visible = main.Visible
+        c.Parent = main
+        table.insert(corners, c)
+    end
+
+    local function update()
+        local pos = main.Position
+        local size = main.Size
+
+        -- top left
+        corners[1].Position = pos + Vector2.new(radius, radius)
+        -- top right
+        corners[2].Position = pos + Vector2.new(size.X - radius, radius)
+        -- bottom left
+        corners[3].Position = pos + Vector2.new(radius, size.Y - radius)
+        -- bottom right
+        corners[4].Position = pos + Vector2.new(size.X - radius, size.Y - radius)
+    end
+
+    update()
+
+    return main
+end
 
 function utility.textlength(str, font, fontsize)
 	local text = Drawing.new("Text")
@@ -1705,16 +1740,16 @@ function library.createdropdown(holder, content, flag, callback, default, max, s
 		Parent = dropdown
 	})
 
-	local contentframe = utility.create("Square", {
-		Filled = true,
-		Visible = islist or false,
-		Thickness = 0,
-		Theme = "Object Background",
-		Size = UDim2.new(1, 0, 0, 0),
-		Position = islist and UDim2.new(0, 0, 0, 14) or UDim2.new(0, 0, 1, 6),
-		ZIndex = 12,
-		Parent = islist and holder or dropdown
-	})
+	local contentframe = utility.roundedSquare(nil, 6, {
+    Filled = true,
+    Visible = islist or false,
+    Thickness = 0,
+    Theme = "Object Background",
+    Size = UDim2.new(1, 0, 0, 0),
+    Position = islist and UDim2.new(0, 0, 0, 14) or UDim2.new(0, 0, 1, 6),
+    ZIndex = 12,
+    Parent = islist and holder or dropdown
+})
 
 	utility.outline(contentframe, "Object Border")
 
@@ -2265,16 +2300,16 @@ function library.createcolorpicker(default, defaultalpha, parent, count, flag, c
 		Data = library.gradient
 	})
 
-	local window = utility.create("Square", {
-		Filled = true,
-		Thickness = 0,
-		Parent = icon,
-		Theme = "Object Background",
-		Size = UDim2.new(0, 192, 0, 158),
-		Visible = false,
-		Position = UDim2.new(1, -192 + (count * 18) + (count * 6), 1, 6),
-		ZIndex = 11
-	})
+	local window = utility.roundedSquare(nil, 8, {
+    Filled = true,
+    Thickness = 0,
+    Parent = icon,
+    Theme = "Object Background",
+    Size = UDim2.new(0, 192, 0, 158),
+    Visible = false,
+    Position = UDim2.new(1, -192 + (count * 18) + (count * 6), 1, 6),
+    ZIndex = 11
+})
 
 	table.insert(pickers, window)
 
@@ -2919,14 +2954,14 @@ function library:Load(options)
 		Parent = holder,
 	})
 
-	local main = utility.create("Square", {
-		Size = UDim2.new(1, 0, 0, sizeY),
-		Filled = true,
-		Thickness = 0,
-		Parent = holder,
-		ZIndex = 3,
-		Theme = "Window Background"
-	})
+	local main = utility.roundedSquare(nil, 10, {
+    Size = UDim2.new(1, 0, 0, sizeY),
+    Filled = true,
+    Thickness = 0,
+    Parent = holder,
+    ZIndex = 3,
+    Theme = "Window Background"
+})
 
 	main.MouseEnter:Connect(function()
 		services.ContextActionService:BindActionAtPriority("disablemousescroll", function() 
