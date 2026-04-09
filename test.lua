@@ -996,9 +996,14 @@ end
 function utility.roundedSquare(parent, radius, props)
     local main = utility.create("Square", props)
 
-    local corners = {}
+    -- side fills (THIS FIXES THE DOT ISSUE)
+    local top = drawing:new("Square")
+    local bottom = drawing:new("Square")
+    local left = drawing:new("Square")
+    local right = drawing:new("Square")
 
-    for i = 1, 4 do
+    local corners = {}
+    for i = 1,4 do
         local c = drawing:new("Circle")
         c.Filled = true
         c.Radius = radius
@@ -1010,30 +1015,42 @@ function utility.roundedSquare(parent, radius, props)
     end
 
     local function update()
-    local pos = main.Position
-    local size = main.Size
+        local pos = main.AbsolutePosition or main.Position
+        local size = main.AbsoluteSize or main.Size
 
-    -- convert if UDim2
-    if typeof(pos) == "UDim2" then
-        pos = Vector2.new(pos.X.Offset, pos.Y.Offset)
+        if typeof(pos) ~= "Vector2" or typeof(size) ~= "Vector2" then return end
+
+        local x, y = pos.X, pos.Y
+        local w, h = size.X, size.Y
+
+        -- corners
+        corners[1].Position = Vector2.new(x + radius, y + radius)
+        corners[2].Position = Vector2.new(x + w - radius, y + radius)
+        corners[3].Position = Vector2.new(x + radius, y + h - radius)
+        corners[4].Position = Vector2.new(x + w - radius, y + h - radius)
+
+        -- side rectangles (IMPORTANT)
+        top.Position = Vector2.new(x + radius, y)
+        top.Size = Vector2.new(w - radius*2, radius)
+
+        bottom.Position = Vector2.new(x + radius, y + h - radius)
+        bottom.Size = Vector2.new(w - radius*2, radius)
+
+        left.Position = Vector2.new(x, y + radius)
+        left.Size = Vector2.new(radius, h - radius*2)
+
+        right.Position = Vector2.new(x + w - radius, y + radius)
+        right.Size = Vector2.new(radius, h - radius*2)
+
+        -- sync colors
+        for _, obj in pairs({top,bottom,left,right}) do
+            obj.Filled = true
+            obj.Color = main.Color
+            obj.ZIndex = main.ZIndex
+            obj.Visible = main.Visible
+        end
     end
 
-    if typeof(size) == "UDim2" then
-        size = Vector2.new(size.X.Offset, size.Y.Offset)
-    end
-
-    -- safety check
-    if typeof(pos) ~= "Vector2" or typeof(size) ~= "Vector2" then
-        return
-    end
-
-    corners[1].Position = pos + Vector2.new(radius, radius)
-    corners[2].Position = pos + Vector2.new(size.X - radius, radius)
-    corners[3].Position = pos + Vector2.new(radius, size.Y - radius)
-    corners[4].Position = pos + Vector2.new(size.X - radius, size.Y - radius)
-end
-
-    -- update every frame (needed for your UI system)
     game:GetService("RunService").RenderStepped:Connect(update)
 
     return main
