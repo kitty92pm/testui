@@ -1028,6 +1028,41 @@ function utility.roundedSquare(parent, radius, props)
     return main
 end
 
+function utility.roundedOutline(parent, radius, thickness, props)
+    local main = utility.create("Square", props)
+
+    main.Filled = false
+    main.Thickness = thickness
+
+    -- corner circles (outline style)
+    local corners = {}
+    for i = 1,4 do
+        local c = drawing:new("Circle")
+        c.Filled = false
+        c.Thickness = thickness
+        c.Radius = radius
+        c.Color = main.Color
+        c.ZIndex = main.ZIndex
+        c.Visible = main.Visible
+        c.Parent = main
+        table.insert(corners, c)
+    end
+
+    local function update()
+        local pos = main.Position
+        local size = main.Size
+
+        corners[1].Position = pos + Vector2.new(radius, radius)
+        corners[2].Position = pos + Vector2.new(size.X - radius, radius)
+        corners[3].Position = pos + Vector2.new(radius, size.Y - radius)
+        corners[4].Position = pos + Vector2.new(size.X - radius, size.Y - radius)
+    end
+
+    update()
+
+    return main
+end
+
 function utility.textlength(str, font, fontsize)
 	local text = Drawing.new("Text")
 	text.Text = str
@@ -2987,14 +3022,13 @@ function library:Load(options)
 		Visible = false,
 	})
 
-	utility.create("Square", {
-		Size = UDim2.new(0, sizeX, 0, sizeY),
-		Filled = false,
-		Thickness = 2,
-		Parent = dragoutline,
-		ZIndex = 0,
-		Theme = "Window Border",
-	})
+	local outline = utility.roundedOutline(nil, 10, 2, {
+    Size = UDim2.new(0, sizeX, 0, sizeY),
+    Parent = dragoutline,
+    ZIndex = 0,
+    Theme = "Window Border",
+    Visible = true
+})
 	
 	utility.dragify(holder, dragoutline)
 
@@ -3576,13 +3610,13 @@ function library:Load(options)
 				local flag = options.flag or utility.nextflag()
 				local callback = options.callback or function() end
 
-				local box = utility.create("Square", {
-					Filled = true,
-					Thickness = 0,
-					Theme = "Object Background",
-					Size = UDim2.new(1, 0, 0, 14),
-					ZIndex = 7,
-					Parent = sectioncontent
+				local box = utility.roundedSquare(nil, 4, {
+    				Filled = true,
+    				Thickness = 0,
+    				Theme = "Object Background",
+    				Size = UDim2.new(1, 0, 0, 14),
+    				ZIndex = 7,
+    				Parent = sectioncontent
 				})
 
 				utility.outline(box, "Object Border")
